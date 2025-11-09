@@ -110,5 +110,4 @@ B.Tech Student | Data & AI Enthusiast | Web Developer
 
 ---
 
-Would you like me to add a **“Results” section** (with sample graphs like “Range vs Cost” and “Top EV Manufacturers”) so your README looks more complete and visually appealing?
 
