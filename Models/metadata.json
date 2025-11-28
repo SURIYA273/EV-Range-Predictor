@@ -1,0 +1,16 @@
+{
+  "model_name": "EV Range Prediction Model",
+  "target": "range_km",
+  "features": [
+    "top_speed_kmh",
+    "battery_capacity_kWh",
+    "number_of_cells",
+    "torque_nm",
+    "efficiency_wh_per_km",
+    "acceleration_0_100_s",
+    "fast_charging_power_kw_dc",
+    "length_mm",
+    "width_mm",
+    "height_mm"
+  ]
+}

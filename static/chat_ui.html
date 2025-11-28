@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>EV Chatbot</title>
+    <style>
+        body {
+        margin: 0;
+        padding: 15;
+        width: 95%;
+        background: linear-gradient(135deg, #0f172a, #1e293b, #0f172a);
+        font-family: "Segoe UI", sans-serif;
+        color: #000000;
+        height: 90vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        }
+
+        .chat-container {
+        background: rgba(255,255,255,0.08);
+        backdrop-filter: blur(10px);
+        border-radius: 18px;
+        box-shadow: 0 0 25px rgba(0,0,0,0.4);
+        padding: 15px;
+        display: flex;
+        flex-direction: column;
+    }
+
+        .header {
+        text-align: center;
+        font-size: 22px;
+        font-weight: bold;
+        color: #4ade80;
+    }
+
+
+        #box { width: 400px; margin: auto; margin-top: 20px; padding: 20px;
+        }
+        #msgs { height: 450px; overflow-y: auto; }
+        .msg { padding: 8px; margin: 6px; border-radius: 6px; }
+        .user { background:#d3e5ff; text-align: right; font-style: italic;}
+        .bot { background:#eee; font-style: italic;}
+        #row { display:flex; margin-top:10px; }
+        #text { flex:1; padding:10px; border:1px solid #bbb; border-radius:8px; font-style: italic;
+ }
+ #send { margin-left:8px; padding:10px 20px; background:#0057ff; color:white;
+                border:none; border-radius:8px; cursor:pointer; }
+    </style>
+</head>
+<body>
+<div class="chat-container">
+    <div class="header">🔋 EV Range Predictor</div>
+<div id="box">
+    <div id="msgs"></div>
+
+    <div id="row">
+        <input id="text" type="text" placeholder="Type message...">
+        <button id="send">Send</button>
+    </div>
+</div>
+</div>
+
+<script>
+let sessionID = null;
+
+// Start session on load
+window.onload = async () => {
+    let res = await fetch("/chat/start", { method: "POST" });
+    let data = await res.json();
+    sessionID = data.session_id;
+};
+
+// Send message
+document.getElementById("send").onclick = async () => {
+    const input = document.getElementById("text");
+    const msg = input.value.trim();
+    if (!msg) return;
+
+    addMsg(msg, "user");
+    input.value = "";
+
+    let res = await fetch("/chat/" + sessionID, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: msg })
+    });
+
+    let data = await res.json();
+    addMsg(data.reply, "bot");
+};
+
+// Add message to UI
+function addMsg(text, type) {
+    let div = document.createElement("div");
+    div.className = "msg " + type;
+    div.textContent = text;
+    document.getElementById("msgs").appendChild(div);
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,8 @@
+flask
+flask-cors
+openai
+joblib
+pandas
+python-dotenv
+
+
