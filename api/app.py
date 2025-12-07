@@ -1,51 +1,61 @@
-from flask import Flask, request, jsonify, send_from_directory
-import joblib
 import os
+import json
+import joblib
+from flask import Flask, request, jsonify
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
-# Load model
-MODEL_PATH = os.path.join(os.path.dirname(__file__), "..", "models", "model_clean.joblib")
-model = joblib.load(MODEL_PATH)
+# ---- Load Model + Metadata ---- #
+MODEL_PATH = os.path.join(os.path.dirname(__file__), "../Models/model_clean.joblib")
+META_PATH = os.path.join(os.path.dirname(__file__), "../Models/metadata.json")
 
+try:
+    model = joblib.load(MODEL_PATH)
+    with open(META_PATH, "r") as f:
+        metadata = json.load(f)
+    feature_order = metadata["feature_order"]
+    print("Model loaded successfully!")
+except Exception as e:
+    print("Model load failed:", e)
+    feature_order = []
 
-@app.route("/")
-def home():
-    """Serve frontend UI"""
-    static_path = os.path.join(os.path.dirname(__file__), "..", "static")
-    return send_from_directory(static_path, "chat_ui.html")
-
-
-@app.route("/predict", methods=["POST"])
+# ---- Routes ---- #
+@app.route("/api/predict", methods=["POST"])
 def predict():
-    data = request.get_json()
-
-    if "features" not in data:
-        return jsonify({"error": "Missing 'features'"}), 400
-
-    features = data["features"]
-
     try:
-        prediction = model.predict([features])[0]
-        return jsonify({"range_prediction": float(prediction)})
+        data = request.json
+        values = [data.get(f, 0) for f in feature_order]
+
+        prediction = model.predict([values])[0]
+        return jsonify({
+            "status": "success",
+            "predicted_range_km": float(prediction)
+        })
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 
 @app.route("/api/chat", methods=["POST"])
 def chat():
-    """Your existing chat_openai logic here"""
-    from backend.chat_openai import generate_reply
-    message = request.json.get("message", "")
-    response = generate_reply(message)
-    return jsonify({"reply": response})
+    try:
+        user_message = request.json.get("message", "")
+
+        # Basic AI reply (replace later with GPT API)
+        bot_response = f"You asked about EVs: {user_message}"
+
+        return jsonify({"reply": bot_response})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
-@app.route("/static/<path:path>")
-def serve_static(path):
-    static_path = os.path.join(os.path.dirname(__file__), "..", "static")
-    return send_from_directory(static_path, path)
+@app.route("/", methods=["GET"])
+def home():
+    return jsonify({"message": "EV Range Predictor API Running"})
 
 
-# Needed for Vercel
-handler = app
+if __name__ == "__main__":
+    app.run(debug=True)
