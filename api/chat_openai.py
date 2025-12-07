@@ -15,18 +15,18 @@ try:
     model = joblib.load(MODEL_PATH)
     with open(META_PATH, "r") as f:
         metadata = json.load(f)
-    feature_order = metadata["feature"]
+    features = metadata["features"]
     print("Model loaded successfully!")
 except Exception as e:
     print("Model load failed:", e)
-    feature_order = []
+    features = []
 
 # ---- Routes ---- #
 @app.route("/api/predict", methods=["POST"])
 def predict():
     try:
         data = request.json
-        values = [data.get(f, 0) for f in feature_order]
+        values = [data.get(f, 0) for f in features]
 
         prediction = model.predict([values])[0]
         return jsonify({
