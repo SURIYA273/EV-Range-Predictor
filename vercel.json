@@ -2,14 +2,12 @@
   "version": 2,
   "builds": [
     {
-      "src": "api/app.py",
-      "use": "vercel-python"
+      "src": "api/chat_openai.py",
+      "use": "@vercel/python"
     }
   ],
   "routes": [
-    { "src": "/predict", "dest": "api/app.py" },
-    { "src": "/api/chat", "dest": "api/app.py" },
-    { "src": "/", "dest": "api/app.py" },
-    { "src": "/static/(.*)", "dest": "static/$1" }
+    { "src": "/api/(.*)", "dest": "/api/chat_openai.py" },
+    { "src": "/(.*)", "dest": "/static/chat_ui.html" }
   ]
 }
