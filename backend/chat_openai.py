@@ -24,7 +24,7 @@ CORS(app)
 # Model + Metadata
 # -------------------------
 import os.path
-model_path = os.path.join(os.path.dirname(__file__), "../Models/ev_range_predictor.joblib")
+model_path = os.path.join(os.path.dirname(__file__), "../Models/model_clean.joblib")
 metadata_path = os.path.join(os.path.dirname(__file__), "../Models/metadata.json")
 model = joblib.load(model_path)
 metadata = json.load(open(metadata_path))
