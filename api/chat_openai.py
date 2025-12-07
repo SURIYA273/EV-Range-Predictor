@@ -15,7 +15,7 @@ try:
     model = joblib.load(MODEL_PATH)
     with open(META_PATH, "r") as f:
         metadata = json.load(f)
-    feature_order = metadata["feature_order"]
+    feature_order = metadata["feature"]
     print("Model loaded successfully!")
 except Exception as e:
     print("Model load failed:", e)
@@ -40,16 +40,40 @@ def predict():
 
 @app.route("/api/chat", methods=["POST"])
 def chat():
-    try:
-        user_message = request.json.get("message", "")
+    data = request.get_json()
+    user_msg = data.get("message", "").lower()
 
-        # Basic AI reply (replace later with GPT API)
-        bot_response = f"You asked about EVs: {user_message}"
+    # Extract EV features (key:value) even inside sentences
+    feature_map = {}
+    for word in user_msg.replace(",", " ").split():
+        if ":" in word:
+            k, v = word.split(":")
+            feature_map[k] = v
 
-        return jsonify({"reply": bot_response})
+    # If the user gives any EV specs → predict immediately
+    if feature_map:
+        missing = [f for f in required_features if f not in feature_map]
+        if missing:
+            return jsonify({
+                "reply": f"Missing features: {missing}\n"
+                         f"Provide values like: torque_nm:450 efficiency_wh_per_km:180"
+            })
 
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        try:
+            x = [[float(feature_map[f]) for f in required_features]]
+            pred = model.predict(x)[0]
+            return jsonify({
+                "reply": f"⚡ Estimated EV range: {pred:.2f} km"
+            })
+
+        except:
+            return jsonify({"reply": "Some values are invalid. Please check format!"})
+
+    # Normal conversation fallback
+    response = f"Send EV specs like:\n" \
+               f"battery_capacity_kWh:75 torque_nm:450 efficiency_wh_per_km:180"
+    return jsonify({"reply": response})
+
 
 
 @app.route("/", methods=["GET"])
