@@ -1,9 +1,5 @@
 flask
 flask-cors
-openai
-joblib
-pandas
-python-dotenv
 scikit-learn
-
-
+joblib
+numpy
